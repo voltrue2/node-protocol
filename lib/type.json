@@ -8,9 +8,11 @@
 	"float",
 	"double",
 	"bool",
-	"string",
 	"array",
 	"object",
 	"null",
-	"undefined"
+	"undefined",
+	"string8",
+	"string16",
+	"string32"
 ]
