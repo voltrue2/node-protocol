@@ -28,6 +28,7 @@ process.on('uncaughtException', function (error) {
 render.render.func('getDescJs', js.getDesc);
 render.render.func('getCreateJs', js.getCreate);
 render.render.func('getPackJs', js.getPack);
+render.render.func('getUnpackJs', js.getUnpack);
 
 async.series(tasks, done);
 
@@ -88,7 +89,6 @@ function _renderJs(data) {
 	const rendered = render.render(path, data);
 	renderedMap.js[data.name] = { type: '.js', data: rendered };
 	console.log('Code rendered:', ok(data.name), 'as:', ok(path));
-	console.log(data);
 }
 
 function output(next) {
@@ -103,7 +103,7 @@ function output(next) {
 			var list = Object.keys(renderedMap[lang]);
 			async.forEach(list, function (name, _moveon) {
 				var item = renderedMap[lang][name];
-				console.log('Output code:' + ok(path + name + item.type));
+				console.log('Output code:', ok(path + name + item.type));
 				fs.writeFile(path + name + item.type, item.data, 'utf8', _moveon);
 			}, moveon);
 		});

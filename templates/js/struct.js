@@ -24,8 +24,10 @@ function pack(obj) {
 	return Buffer.concat(list);
 }
 
-function unpack() {
-
+function unpack(buf) {
+	const obj = {};
+	{{ getUnpackJs(params) }}
+	return obj;
 }
 
 // Buffer handler static object Bin: Bin.from(<string>) and Bin.alloc(<size>)

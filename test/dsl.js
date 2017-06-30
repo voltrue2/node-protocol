@@ -10,15 +10,40 @@ data.message.message = 'hello world!';
 data.message.sample.id = 100;
 data.message.sample.key = 'KEY-123';
 data.message.sample.value = 'fooo';
-data.message.sample.enable = true;
+data.message.sample.enabled = true;
 data.message.timestamp = Math.floor(Date.now() / 1000);
 
-const packed = hello.pack(data);
+console.log(JSON.stringify(data, null, 2));
+console.log('===========================');
+const origin = JSON.stringify(data);
 
-console.log(packed.length);
-console.log(packed);
+var i;
+var packed;
+var unpacked;
+
+// we do not time as it is inaccurate for some reason...
+for (i = 0; i < 100; i++) {
+	hello.unpack(hello.pack(data));
+}
+
 const msg = require('msgpack-js');
-const p = msg.encode(data);
-console.log(p.length);
-console.log(p);
+const s2 = Date.now();
+for (i = 0; i < 100; i++) {
+	packed = msg.encode(data);
+	unpacked = msg.decode(packed);
+}
+console.log('msgpack pack time:', Date.now() - s2);
+console.log(packed.length);
+console.log(unpacked);
+console.log('msg correct?', JSON.stringify(unpacked) === origin);
+
+const s = Date.now();
+for (i = 0; i < 100; i++) {
+	packed = hello.pack(data);
+	unpacked = hello.unpack(packed);
+}
+console.log('dsl pack time:', Date.now() - s);
+console.log(packed.length);
+console.log(unpacked);
+console.log('dsl correct?', JSON.stringify(unpacked) === origin);
 

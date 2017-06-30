@@ -36,5 +36,7 @@ function oldFrom(str, enc) {
 }
 
 function oldAlloc(size) {
-	return new Buffer(size);
+	const buf = new Buffer(size);
+	buf.fill(0);
+	return buf;
 }
