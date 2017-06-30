@@ -1,0 +1,7 @@
+sample1:
+  dsl: struct
+  params:
+    id: { type: uint32, comment: Unique ID }
+    key: { type: string }
+    value: { type: string, comment: Probably JSON }
+    enabled: { type: bool }

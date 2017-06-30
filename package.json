@@ -1,0 +1,9 @@
+{
+	"name": "node-protocol",
+	"description": "Data conversion into binary for network communications and more",
+	"version": "0.0.1",
+	"dependencies": {
+		"async": "2.5.0",
+		"js-yaml": "3.8.4"
+	}
+}

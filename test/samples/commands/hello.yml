@@ -1,0 +1,17 @@
+hello:
+  dsl: struct
+  command: 100
+  reliable: true
+  params:
+    uid: { type: string }
+    message: { type: world }
+
+world:
+  description: This is the sub struct of "hello"
+  dsl: struct
+  params:
+    senderUid: { type: string }
+    recipients: { type: string, array: true }
+    message: { type: string }
+    sample: { type: sample1, comment: Sample parameter }
+    timestamp: { type: uint32 }
