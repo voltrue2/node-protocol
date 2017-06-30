@@ -77,13 +77,16 @@ function loadTemplates(next) {
 }
 
 function renderCode(next) {
+	var index = 0;
 	for (const name in source) {
-		_renderJs(source[name]);
+		_renderJs(index, source[name]);
+		index += 1;
 	}
 	next();
 }
 
-function _renderJs(data) {
+function _renderJs(index, data) {
+	data.index = index;
 	data.buffer = view.getBufferCode();
 	const path = 'js/' + data.dsl + '.js';
 	const rendered = render.render(path, data);

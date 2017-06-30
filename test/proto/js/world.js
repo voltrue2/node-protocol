@@ -2,12 +2,18 @@
 
 /* This is the sub struct of "hello" */
 
+const id = 2;
 const name = 'world';
 
+module.exports.getId = getId;
 module.exports.name = getName;
 module.exports.create = create;
 module.exports.pack = pack;
 module.exports.unpack = unpack;
+
+function getId() {
+	return id;
+}
 
 function getName() {
 	return name;

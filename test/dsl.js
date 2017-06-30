@@ -21,10 +21,16 @@ var i;
 var packed;
 var unpacked;
 
-// we do not time as it is inaccurate for some reason...
+const s3 = Date.now();
 for (i = 0; i < 100; i++) {
-	hello.unpack(hello.pack(data));
+	packed = new Buffer(JSON.stringify(data));
+	unpacked = JSON.parse(packed);
 }
+console.log('JSON pack time:', Date.now() - s3);
+console.log(packed.length);
+console.log(unpacked);
+console.log('JSON correct?', JSON.stringify(unpacked) === origin);
+console.log('--------------------------');
 
 const msg = require('msgpack-js');
 const s2 = Date.now();
@@ -36,6 +42,7 @@ console.log('msgpack pack time:', Date.now() - s2);
 console.log(packed.length);
 console.log(unpacked);
 console.log('msg correct?', JSON.stringify(unpacked) === origin);
+console.log('--------------------------');
 
 const s = Date.now();
 for (i = 0; i < 100; i++) {

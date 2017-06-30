@@ -2,12 +2,18 @@
 
 
 
+const id = 0;
 const name = 'sample1';
 
+module.exports.getId = getId;
 module.exports.name = getName;
 module.exports.create = create;
 module.exports.pack = pack;
 module.exports.unpack = unpack;
+
+function getId() {
+	return id;
+}
 
 function getName() {
 	return name;
