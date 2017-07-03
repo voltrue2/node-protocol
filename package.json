@@ -5,5 +5,34 @@
 	"dependencies": {
 		"async": "2.5.0",
 		"js-yaml": "3.8.4"
+	},
+	"jshintConfig": {
+		"esversion": 6,
+		"node": true,
+		"bitwise": false,
+		"camelcase": true,
+		"curly": true,
+		"eqeqeq": true,
+		"forin": false,
+		"immed": true,
+		"latedef": false,
+		"newcap": true,
+		"noarg": true,
+		"noempty": true,
+		"undef": true,
+		"unused": true,
+		"nonew": true,
+		"white": true,
+		"maxdepth": 5,
+		"quotmark": "single",
+		"globals": {
+			"mocha": false,
+			"describe": false,
+			"it": false,
+			"before": false,
+			"beforeEach": false,
+			"after": false,
+			"afterEach": false
+		}
 	}
 }
