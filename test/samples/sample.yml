@@ -5,3 +5,11 @@ sample1:
     key: { type: string }
     value: { type: string, comment: Probably JSON }
     enabled: { type: bool }
+    sample2list: { type: sample2, array: true } 
+    datetime: { type: datetime, comment: Date time object }
+
+sample2:
+  dsl: struct
+  params:
+     name: { type: string }
+

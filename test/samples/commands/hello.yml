@@ -3,6 +3,7 @@ hello:
   command: 100
   reliable: true
   params:
+    timelist: { type: datetime, array: true }
     uid: { type: string }
     message: { type: world }
 

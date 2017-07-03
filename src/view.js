@@ -84,19 +84,21 @@ function getTypeValue(type, isArray) {
 	}
 	switch (type) {
 		case 'string':
-			return isArray ? [ '' ] : '';
+			return isArray ? [] : '';
 		case 'int8':
 		case 'int16':
 		case 'int32':
 		case 'uint8':
 		case 'uint16':
 		case 'uint32':
-			return isArray ? [ 0 ] : 0;
+			return isArray ? [] : 0;
 		case 'float':
 		case 'double':
-			return isArray ? [ 0.0 ] : 0.0;
+			return isArray ? [] : 0.0;
 		case 'bool':
-			return isArray ? [ true ] : true;
+			return isArray ? [] : true;
+		case 'datetime':
+			return isArray ? [] : new Date(); 
 		default:
 			// only struct can be sub struct
 			if (sourceDataMap.struct[type]) {

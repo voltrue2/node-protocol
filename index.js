@@ -53,6 +53,8 @@ function loadSource(next) {
 		}
 		view.setup(list);
 		source = view.getAllData();
+		// pass source map to js
+		js.source(source);
 		next();
 	});
 }
