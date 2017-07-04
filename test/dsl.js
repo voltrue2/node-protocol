@@ -22,6 +22,9 @@ data.message.sample.enabled = true;
 data.message.sample.sample2list[0] = { name: 'ABC' };
 data.message.sample.sample2list[1] = { name: 'DEF' };
 data.message.sample.sample2list[2] = { name: 'GHI' };
+data.message.sample._eight = -128;
+data.message.sample._sixteen = -100;
+data.message.sample._thirtytwo = -6000;
 data.message.timestamp = Math.floor(Date.now() / 1000);
 
 console.log(JSON.stringify(data, null, 2));

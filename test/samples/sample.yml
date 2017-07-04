@@ -6,6 +6,9 @@ sample1:
     value: { type: string, comment: Probably JSON }
     enabled: { type: bool }
     sample2list: { type: sample2, array: true } 
+    _eight: { type: int8 }
+    _sixteen: { type: int16 }
+    _thirtytwo: { type: int32 }
     datetime: { type: datetime, comment: Date time object }
 
 sample2:

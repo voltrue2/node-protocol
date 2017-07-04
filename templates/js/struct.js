@@ -1,7 +1,5 @@
 'use strict';
-
-{{ getDescJs(description) }}
-
+{{ desc(description) }}
 const id = {{ index }};
 const name = '{{ name }}';
 
@@ -20,7 +18,7 @@ function getName() {
 }
 
 function create() {
-	return {{ getCreateJs(params) }};
+	return {{ getPropsJs(params) }};
 }
 
 // converts an object into binary

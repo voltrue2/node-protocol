@@ -4,7 +4,9 @@ const async = require('async');
 const loader = require('./src/loader');
 const view = require('./src/view');
 const render = require('./src/render');
+const lib = require('./src/lib');
 const js = require('./src/langs/javascript');
+const cs = require('./src/langs/csharp');
 
 const dslPath = process.argv[2];
 const outputPath = process.argv[3];
@@ -17,7 +19,8 @@ const tasks = [
 	output
 ];
 const renderedMap = {
-	js: {}
+	js: {},
+	cs: {}
 };
 var source;
 
@@ -25,10 +28,18 @@ process.on('uncaughtException', function (error) {
 	console.error(er(error.message + '\n' + error.stack));
 });
 
-render.render.func('getDescJs', js.getDesc);
-render.render.func('getCreateJs', js.getCreate);
+// Shared lib functions
+render.render.func('className', lib.className);
+render.render.func('desc', lib.desc);
+// Node.js code generator functions
+render.render.func('getPropsJs', js.getProps);
 render.render.func('getPackJs', js.getPack);
 render.render.func('getUnpackJs', js.getUnpack);
+// C# code generator functions
+render.render.func('getPropsCs', cs.getProps);
+render.render.func('getPackCs', cs.getPack);
+render.render.func('getUnpackCs', cs.getUnpack);
+render.render.func('getByteProps', cs.getByteProps);
 
 async.series(tasks, done);
 
@@ -55,6 +66,8 @@ function loadSource(next) {
 		source = view.getAllData();
 		// pass source map to js
 		js.source(source);
+		// pass source map to cs
+		cs.source(source);
 		next();
 	});
 }
@@ -66,7 +79,6 @@ function loadTemplates(next) {
 		if (error) {
 			return next(error);
 		}
-		console.log('Prepare templates');
 		const paths = render.render.getAllPaths();
 		if (!paths.length) {
 			return next(new Error('No templates found in:' + templatePath));
@@ -82,6 +94,7 @@ function renderCode(next) {
 	var index = 0;
 	for (const name in source) {
 		_renderJs(index, source[name]);
+		_renderCs(index, source[name]);
 		index += 1;
 	}
 	next();
@@ -93,6 +106,15 @@ function _renderJs(index, data) {
 	const path = 'js/' + data.dsl + '.js';
 	const rendered = render.render(path, data);
 	renderedMap.js[data.name] = { type: '.js', data: rendered };
+	console.log('Code rendered:', ok(data.name), 'as:', ok(path));
+}
+
+function _renderCs(index, data) {
+	data.index = index;
+	data.buffer = view.getBufferCode();
+	const path = 'cs/' + data.dsl + '.cs';
+	const rendered = render.render(path, data);
+	renderedMap.cs[data.name] = { type: '.cs', data: rendered };
 	console.log('Code rendered:', ok(data.name), 'as:', ok(path));
 }
 

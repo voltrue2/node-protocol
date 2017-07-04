@@ -24,9 +24,6 @@ exports.setup = function __renderIndexSetup(cb) {
 };
 
 exports.render = function __renderIndexRender(path, vars, cacheTtl) {
-	if (cacheTtl === undefined) {
-		cacheTtl = DEFAULT_TTL;
-	}
 	if (cacheTtl) {
 		var res = cache.get(vars);
 		if (res) {

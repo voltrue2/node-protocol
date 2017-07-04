@@ -4,7 +4,7 @@ var source;
 
 module.exports.source = source;
 module.exports.getDesc = getDesc;
-module.exports.getCreate = getCreate;
+module.exports.getProps = getProps;
 module.exports.getPack = getPack;
 module.exports.getUnpack = getUnpack;
 
@@ -16,7 +16,7 @@ function getDesc(description) {
 	return description ? '/* ' + description + ' */' : '';
 }
 
-function getCreate(params, tab) {
+function getProps(params, tab) {
 	if (!tab) {
 		tab = '';
 	}
@@ -57,7 +57,7 @@ function getCreate(params, tab) {
 					if (!param.value || !param.value.params) {
 						throw new Error('Invalid data type:' + param.type);
 					}
-					value = getCreate(param.value.params, tab);
+					value = getProps(param.value.params, tab);
 				}
 				break;
 		}
@@ -80,12 +80,6 @@ function getPack(params, _parent, _tab, isParentArray) {
 		var type = param.type;
 		var pname = _parent + '.' + name;
 		var vname = _createVname(pname);
-		/*
-		code += tab + '// ' + (param.comment || 'pack ' + pname) + '\n';
-		code += tab + 'if (obj' + pname + ' === null || obj' + pname + ' === undefined) {\n';
-		code += tab + tab + 'throw new Error(\'obj' + pname + ' cannot be null or undefined\');\n';
-		code += tab + '}\n';
-		*/
 		if (isArray) {
 			code += tab + '// ' + pname + ' is an array\n';
 			code += tab + 'const ' + vname + 'LengthBytes = Bin.alloc(2);\n';
@@ -129,17 +123,17 @@ function _getPackValue(tab, type, name, vname, pname, param, _parent) {
 			break;
 		case 'int8':
 			code += tab + 'var ' + vname + 'Bytes = Bin.alloc(1);\n';
-			code += tab + vname + 'Bytes.writeInt8(obj' + vpname + arrayIndex + ', 0);\n';
+			code += tab + vname + 'Bytes.writeInt8(obj' + pname + arrayIndex + ', 0);\n';
 			code += tab + 'list.push(' + vname + 'Bytes);\n';
 			break;
 		case 'int16':
 			code += tab + 'var ' + vname + 'Bytes = Bin.alloc(2);\n';
-			code += tab + vname + 'Bytes.writeInt16BE(obj' + pname + arrayIndex + ', 0);\n';
+			code += tab + vname + 'Bytes.writeInt16LE(obj' + pname + arrayIndex + ', 0);\n';
 			code += tab + 'list.push(' + vname + 'Bytes);\n';
 			break;
 		case 'int32':
 			code += tab + 'var ' + vname + 'Bytes = Bin.alloc(4);\n';
-			code += tab + vname + 'Bytes.writeInt32BE(obj' + pname + arrayIndex + ', 0);\n';
+			code += tab + vname + 'Bytes.writeInt32LE(obj' + pname + arrayIndex + ', 0);\n';
 			code += tab + 'list.push(' + vname + 'Bytes);\n';
 			break;
 		case 'uint8':
@@ -271,17 +265,17 @@ function _getUnpackValue(tab, type, name, vname, pname, param, _parent) {
 			break;
 		case 'int16':
 			if (isArray) {
-				code += tab + 'obj' + pname + '.push(buf.readInt16BE(offset));\n';
+				code += tab + 'obj' + pname + '.push(buf.readInt16LE(offset));\n';
 			} else {
-				code += tab + 'obj' + pname + ' = buf.readInt16BE(offset);\n';
+				code += tab + 'obj' + pname + ' = buf.readInt16LE(offset);\n';
 			}
 			code += tab + 'offset += 2;\n';
 			break;
 		case 'int32':
 			if (isArray) {
-				code += tab + 'obj' + pname + '.push(buf.readInt32BE(offset));\n';
+				code += tab + 'obj' + pname + '.push(buf.readInt32LE(offset));\n';
 			} else {
-				code += tab + 'obj' + pname + ' = buf.readInt32BE(offset);\n';
+				code += tab + 'obj' + pname + ' = buf.readInt32LE(offset);\n';
 			}
 			code += tab + 'offset += 4;\n';
 			break;

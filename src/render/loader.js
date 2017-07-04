@@ -1,9 +1,10 @@
 'use strict';
 
-var fs = require('fs');
-var async = require('async');
-var render = require('./render');
+const fs = require('fs');
+const async = require('async');
+const render = require('./render');
 
+var files = [ '.js', '.cs', '.php' ];
 var dirpath;
 var loaded = {};
 var client = '';
@@ -53,8 +54,8 @@ function load(path, cb) {
 			});
 			return;
 		}
-		// ignore everything but .js file
-		if (path.substring(path.length - 3) !== '.js') {
+		// ignore everything but the files allowed
+		if (files.indexOf(path.substring(path.length - 3)) === -1) {
 			return cb();
 		}
 		fs.readFile(path, 'utf8', function __renderLoaderReadFile(error, content) {
@@ -63,9 +64,6 @@ function load(path, cb) {
 			}
 			var pathName = path.replace(dirpath, '');
 			var prerenderedData = render.prerender(content);
-			
-			console.log(pathName);
-
 			loaded[pathName] = {
 				source: prerenderedData.content,
 				tags: prerenderedData.list,
