@@ -41,7 +41,7 @@ for (i = 0; i < 100; i++) {
 	unpacked = JSON.parse(packed);
 }
 console.log('JSON pack time:', Date.now() - s3);
-console.log(packed.length);
+console.log(packed.length + ' bytes');
 console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 console.log('JSON correct?', JSON.stringify(unpacked) === origin);
 console.log('--------------------------');
@@ -53,7 +53,7 @@ for (i = 0; i < 100; i++) {
 	unpacked = msg.decode(packed);
 }
 console.log('msgpack pack time:', Date.now() - s2);
-console.log(packed.length);
+console.log(packed.length + ' bytes');
 console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 console.log('msg correct?', JSON.stringify(unpacked) === origin);
 console.log('--------------------------');
@@ -64,7 +64,7 @@ for (i = 0; i < 100; i++) {
 	unpacked = hello.unpack(packed);
 }
 console.log('dsl pack time:', Date.now() - s);
-console.log(packed.length);
+console.log(packed.length + ' bytes');
 console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 console.log('dsl correct?', JSON.stringify(unpacked) === origin);
 

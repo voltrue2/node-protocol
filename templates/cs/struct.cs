@@ -8,8 +8,8 @@ namespace NodeProtocol {
 	public class {{ className(name) }} {
 
 		// public constants
-		public const uint Id = {{ index }};
-		public const string Name = "{{ name }}";
+		public const uint ID = {{ index }};
+		public const string NAME = "{{ name }}";
 		// public properties
 		{{ getPropsCs(params) }}
 		// private properties
