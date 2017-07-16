@@ -79,13 +79,40 @@ function getPack(params, _parent, _tab, isParentArray) {
 	}
 	const tab = _tab || '\t\t\t';
 	const SIZE = 0;
+	var i;
+	var len;
+	var param;
+	var name;
+	var type;
 	var code = '\n';
+	code += tab + 'int totalBufSize = 0;\n';
+	for (i = 0, len = params.length; i < len; i++) {
+		param = params[i];
+		name = param.name;
+		type = param.type;
+		if (param.array) {
+			code += tab + '// ' + lib.className(name) + ' is an array of ' + _dataType(type) + '\n';
+			code += tab + 'totalBufSize += 2;\n';
+			code += tab + 'List<byte[]> ' + name + 'PackByteList = new List<byte[]>();\n';
+			code += tab + 'for (int ' + name + 'Index = 0, ' + name +
+				'ArrayLength = ' + lib.className(name) + '.Length; ' +
+				name + 'Index < ' + name + 'ArrayLength; ' + name + 'Index++) {\n';
+			code += _getPackBytes(tab + '\t', type, name, param);
+			code += tab + '\t' + name + 'PackByteList.Add(' + name + 'Bytes);\n';
+			code += tab + '}\n';
+		} else {
+			code += _getPackBytes(tab, type, name, param);
+		}
+	}
+	code += '\n';
+	code += tab + '// create pack buffer\n';
+	code += tab + 'byte[] buf = new byte[totalBufSize];\n';
 	code += tab + 'int offset = 0;\n';
-	code += tab + 'byte[] buf = new byte[' + SIZE + '];\n';
-	for (var i = 0, len = params.length; i < len; i++) {
-		var param = params[i];
-		var name = param.name;
-		var type = param.type;
+	code += '\n';
+	for (i = 0, len = params.length; i < len; i++) {
+		param = params[i];
+		name = param.name;
+		type = param.type;
 		if (param.array) {
 			code += tab + '// ' + lib.className(name) + ' is an array of ' + _dataType(type) + '\n';
 			code += tab + '_2bytes = BitConverter.GetBytes((ushort)' + lib.className(name) + '.Length);\n';
@@ -104,76 +131,164 @@ function getPack(params, _parent, _tab, isParentArray) {
 	return code;
 }
 
-function _getPackValue(tab, type, name, param) {
+function _getPackBytes(tab, type, name, param) {
 	const capName = lib.className(name);
-	const comment = (param.comment ? param.comment + ': ' : '') + 'pack ' + lib.className(name) + ' as ' + _dataType(type);
-	const suffix = (param.array ? '[' + name + 'Index]' : '');
+	const comment = (param.comment ? param.comment + ': ' : '') + 'get byte size of ' + _dataType(type) + ' as ' + lib.className(name);
+	const suffix = '[' + name + 'Index]';
+	const bname = name + 'Bytes';
+	const sname = param.array ? capName + suffix : capName;
 	var extra = '';
 	var code = tab + '// ' + comment + '\n';
-	code += tab + 'int ' + name + 'TotalSize = 0;\n';
 	switch (type) {
 		case 'string':
-			code += tab + 'byte[] ' + name + 'Bytes = Encoding.UTF8.GetBytes(' + capName + suffix + ');\n'
-			code += tab + 'byte[] ' + name + 'SizeBytes = BitConverter.GetBytes((ushort)' + name + 'Bytes.Length);\n';
-			code += tab + 'Array.Reverse(' + name + 'SizeBytes);\n';
-			extra = tab + 'Buffer.BlockCopy(' + name + 'SizeBytes, 0, buf, offset, 2);\n';
-			extra += tab + 'offset += 2;\n';
-			code += tab + name + 'TotalSize = 2 + ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = Encoding.UTF8.GetBytes(' + sname + ');\n'
+			code += tab + 'totalBufSize += 2 + ' + bname + '.Length;\n';
 			break;
 		case 'int8':
 		case 'uint8':
-			code += tab + 'byte[] ' + name + 'Bytes = BitConverter.GetBytes(' + capName + suffix + ');\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'totalBufSize += 1;\n';
 			break;
 		case 'int16':
+			// little endian
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'totalBufSize += 2;\n';
+			break;
 		case 'int32':
 			// little endian
-			code += tab + 'byte[] ' + name + 'Bytes = BitConverter.GetBytes(' + capName + suffix + ');\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'totalBufSize += 4;\n';
 			break;
 		case 'uint16':
+			// big endian
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'Array.Reverse(' + bname + ');\n';
+			code += tab + 'totalBufSize += 2;\n';
+			break;
 		case 'uint32':
 		case 'float':
+			// big endian
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'Array.Reverse(' + bname + ');\n';
+			code += tab + 'totalBufSize += 4;\n';
+			break;
 		case 'double':
 			// big endian
-			code += tab + 'byte[] ' + name + 'Bytes = BitConverter.GetBytes(' + capName + suffix + ');\n';
-			code += tab + 'Array.Reverse(' + name + 'Bytes);\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + sname + ');\n';
+			code += tab + 'Array.Reverse(' + bname + ');\n';
+			code += tab + 'totalBufSize += 8;\n';
 			break;
 		case 'bool':
 			code += tab + 'int ' + name + 'Bool = 0;\n';
-			code += tab + 'if (' + capName + suffix + ' == true) {\n';
+			code += tab + 'if (' + sname + ' == true) {\n';
 			code += tab + '\t' + name + 'Bool = 1;\n';
 			code += tab + '}\n';
-			code += tab + 'byte[] ' + name + 'Bytes = BitConverter.GetBytes(' + name + 'Bool);\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes(' + name + 'Bool);\n';
+			code += tab + 'totalBufSize += 1;\n';
 			break;
 		case 'datetime':
-			code += tab + 'double ' + name + 'Time = (' + capName + suffix + ' - new DateTime(1970, 1, 1)).TotalMilliseconds;\n';
-			code += tab + 'byte[] ' + name + 'Bytes = BitConverter.GetBytes((double)' + name + 'Time);\n';
-			code += tab + 'Array.Reverse(' + name + 'Bytes);\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'double ' + name + 'Time = (' + sname + ' - new DateTime(1970, 1, 1)).TotalMilliseconds;\n';
+			code += tab + 'byte[] ' + bname + ' = BitConverter.GetBytes((double)' + name + 'Time);\n';
+			code += tab + 'Array.Reverse(' + bname + ');\n';
+			code += tab + 'totalBufSize += 8;\n';
 			break;
 		default:
 			if (!param.value) {
 				throw new Error('Invalid data type:' + param.type);
 			}
-			code += tab + 'byte[] ' + name + 'Bytes = ' + capName + suffix + '.Pack();\n';
-			code += tab + name + 'TotalSize = ' + name + 'Bytes.Length;\n';
+			code += tab + 'byte[] ' + bname + ' = ' + sname + '.Pack();\n';
+			code += tab + 'totalBufSize += 2 + ' + bname + '.Length;\n';
 			break;
 	}
-	// expand buffer if necessary
-	code += tab + 'if (buf.Length + ' + name + 'TotalSize > buf.Length) {\n';
-	code += tab + '\tbyte[] newBuf = new byte[buf.Length + ' + name + 'TotalSize];\n';
-	code += tab + '\tBuffer.BlockCopy(newBuf, 0, buf, 0, buf.Length);\n';
-	code += tab + '\tbuf = new byte[newBuf.Length];\n';
-	code += tab + '\tBuffer.BlockCopy(buf, 0, newBuf, 0, newBuf.Length);\n';
-	code += tab + '}\n';
+	return code;
+}
+
+function _getPackValue(tab, type, name, param) {
+	const capName = lib.className(name);
+	const comment = (param.comment ? param.comment + ': ' : '') + 'pack ' + _dataType(type) + ' as ' + lib.className(name);
+	const suffix = '[' + name + 'Index]';
+	const bname = name + 'Bytes';
+	const sname = param.array ? capName + suffix : capName;
+	var extra = '';
+	var code = tab + '// ' + comment + '\n';
 	// copy the param byte data
-	code += extra;
-	code += tab + 'Buffer.BlockCopy(buf, offset, ' + name + 'Bytes, 0, ' + name + 'Bytes.Length);\n';
-	// update the offset by adding the param byte data size
-	code += tab + 'offset += ' + name + 'Bytes.Length;\n';
+	if (param.array) {
+		const lname = name + 'PackByteList[' + name + 'Index]';
+		switch (type) {
+			case 'int8':
+			case 'uint8':
+			case 'int16':
+			case 'uint16':
+			case 'int32':
+			case 'uint32':
+			case 'float':
+			case 'double':
+			case 'bool':
+			case 'datetime':
+				break;
+			case 'string':
+			default:
+				code += tab + '_2bytes = BitConverter.GetBytes((ushort)' + lname + '.Length);\n';
+				code += tab + 'Array.Reverse(_2bytes);\n';
+				code += tab + 'Buffer.BlockCopy(buf, offset, _2bytes, 0, 2);\n';
+				code += tab + 'offset += 2;\n';
+				break;	
+		}
+		code += tab + 'Buffer.BlockCopy(buf, offset, ' + lname + ', 0, ' + lname + '.Length);\n';
+		// update the offset by adding the param byte data size
+		code += tab + 'offset += ' + lname + '.Length;\n';
+	} else {
+		switch (type) {
+			case 'int8':
+			case 'uint8':
+			case 'int16':
+			case 'uint16':
+			case 'int32':
+			case 'uint32':
+			case 'float':
+			case 'double':
+			case 'bool':
+			case 'datetime':
+				break;
+			case 'string':
+			default:
+				code += tab + '_2bytes = BitConverter.GetBytes((ushort)' + bname + '.Length);\n';
+				code += tab + 'Array.Reverse(_2bytes);\n';
+				code += tab + 'Buffer.BlockCopy(buf, offset, _2bytes, 0, 2);\n';
+				code += tab + 'offset += 2;\n';
+				break;	
+		}
+		code += tab + 'Buffer.BlockCopy(buf, offset, ' + bname + ', 0, ' + bname + '.Length);\n';
+		// update the offset by adding the param byte data size
+		switch (type) {
+			case 'int8':
+			case 'uint8':
+				code += tab + 'offset += 1;\n';
+				break;
+			case 'int16':
+			case 'uint16':
+				code += tab + 'offset += 2;\n';
+				break;
+			case 'int32':
+			case 'uint32':
+			case 'float':
+				code += tab + 'offset += 4;\n';
+				break;
+			case 'double':
+				code += tab + 'offset += 8;\n';
+				break;
+			case 'bool':
+				code += tab + 'offset += 1;\n';
+				break;
+			case 'datetime':
+				code += tab + 'offset += 8;\n';
+				break;
+			case 'string':
+			default:
+				code += tab + 'offset += ' + bname + '.Length;\n';
+				break;	
+		}
+	}
 	return code;
 }
 
@@ -213,7 +328,7 @@ function getUnpack(params, _parent, _tab, isParentArray) {
 
 function _getUnpackValue(tab, type, name, param) {
 	const isArray = param.array;
-	const comment = (param.comment ? param.comment + ': ' : '') +  'unpack ' + name + ' as ' + type;
+	const comment = (param.comment ? param.comment + ': ' : '') +  'unpack ' + _dataType(type) + ' as ' + lib.className(name);
 	var capName = lib.className(name);
 	var code = tab + '// ' + comment + '\n';
 	switch (type){
@@ -334,10 +449,10 @@ function _getUnpackValue(tab, type, name, param) {
 		default:
 			code += tab + 'Buffer.BlockCopy(buf, offset, _2bytes, 0, 2);\n';
 			code += tab + 'Array.Reverse(_2bytes);\n';
-			code += tab + 'int ' + type + 'Size = (int)BitConverter.ToUInt16(_2bytes, 0);\n';
+			code += tab + 'int ' + name + 'Size = (int)BitConverter.ToUInt16(_2bytes, 0);\n';
 			code += tab + 'offset += 2;\n';
-			code += tab + 'byte[] ' + type + 'Bytes = new byte[' + type + 'Size];\n';
-			code += tab + 'Buffer.BlockCopy(buf, offset, ' + type + 'Bytes, 0, ' + type + 'Size);\n';
+			code += tab + 'byte[] ' + name + 'Bytes = new byte[' + name + 'Size];\n';
+			code += tab + 'Buffer.BlockCopy(buf, offset, ' + name + 'Bytes, 0, ' + name + 'Size);\n';
 			if (isArray) {
 				if (!param.value) {
 					throw new Error('Invalid data type as array:' + type);
@@ -345,14 +460,14 @@ function _getUnpackValue(tab, type, name, param) {
 				if (!source[type]) {
 					throw new Error('Invalid data type as array:' + type);
 				}
-				code += tab + capName + '[' + name + 'Index] = new ' + lib.className(type) + '(' + type + 'Bytes);\n';
+				code += tab + capName + '[' + name + 'Index] = new ' + lib.className(type) + '(' + name + 'Bytes);\n';
 			} else {
 				if (!param.value || !param.value.params) {
 					throw new Error('Invalid data type:' + param.type);
 				}
-				code += tab + capName + ' = new ' + lib.className(type) + '(' + type + 'Bytes);\n';
+				code += tab + capName + ' = new ' + lib.className(type) + '(' + name + 'Bytes);\n';
 			}
-			code += tab + 'offset += ' + type + 'Size;\n';
+			code += tab + 'offset += ' + name + 'Size;\n';
 			break;
 	}
 	return code;
