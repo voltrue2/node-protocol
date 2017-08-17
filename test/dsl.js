@@ -70,6 +70,7 @@ console.log(packed.length + ' bytes');
 console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 console.log('dsl correct?', JSON.stringify(unpacked) === origin);
 
+/* C#
 console.log('-------------------------');
 exec('mono test/build/test.exe', function (err, out) {
 	if (err) {
@@ -91,4 +92,5 @@ exec('mono test/build/test.exe', function (err, out) {
 	const unpacked = hello.unpack(buf);
 	console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 });
+*/
 

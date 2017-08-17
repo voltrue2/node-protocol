@@ -1,6 +1,6 @@
 'use strict';
 
-const packer = require('../');
+const packer = require('../lib/js/packer');
 const msg = require('msgpack-js');
 const obj = { list: [
 	'Hello world',
