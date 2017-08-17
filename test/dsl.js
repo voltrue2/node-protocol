@@ -1,10 +1,11 @@
 'use strict';
 
+const exec = require('child_process').exec;
 const hello = require('./proto/js/hello');
 const util = require('util');
 const data = hello.create();
 data.timelist = [
-	new Date(),
+	new Date('2017-07-17 10:12:59'),
 	new Date('2016-10-10 00:00:00')
 ];
 data.uid = 'UID-abcdefg';
@@ -25,7 +26,8 @@ data.message.sample.sample2list[2] = { name: 'GHI' };
 data.message.sample._eight = -128;
 data.message.sample._sixteen = -100;
 data.message.sample._thirtytwo = -6000;
-data.message.timestamp = Math.floor(Date.now() / 1000);
+data.message.sample.datetime = new Date('2000-09-07 00:00:00');
+data.message.timestamp = 0xffffffff;
 
 console.log(JSON.stringify(data, null, 2));
 console.log('===========================');
@@ -67,4 +69,26 @@ console.log('dsl pack time:', Date.now() - s);
 console.log(packed.length + ' bytes');
 console.log(util.inspect(unpacked, { depth: 10, colors: true }));
 console.log('dsl correct?', JSON.stringify(unpacked) === origin);
+
+console.log('-------------------------');
+exec('mono test/build/test.exe', function (err, out) {
+	if (err) {
+		console.error(err);
+		return process.exit(1);
+	}
+
+	console.log('++++++++++++++++++++++++++');
+	console.log(out);
+	console.log('--------------------------');
+	console.log(packed.join(' '));
+	console.log('++++++++++++++++++++++++++');
+
+	const list = out.split(' ');
+	const buf = Buffer.alloc(out.length);
+	for (var i = 0, len = list.length; i < len; i++) {
+		buf[i] = list[i];
+	}
+	const unpacked = hello.unpack(buf);
+	console.log(util.inspect(unpacked, { depth: 10, colors: true }));
+});
 
