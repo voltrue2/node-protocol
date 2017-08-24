@@ -9,10 +9,12 @@ const template = fs.readFileSync(__dirname + '/../../templates/js/struct.js', 'U
 const INDENT = '\t';
 
 const tasks = [
-	loadDSL
+	loadDSL,
+	outputCode,
+	copyNodeBufferCode
 ];
 
-var rendered = {};
+var renderedmap = {};
 
 async.series(tasks, done);
 
@@ -27,11 +29,42 @@ function loadDSL(next) {
 	});	
 }
 
+function outputCode(next) {
+	var destpath = args.getDestPath();
+	for (var name in renderedmap) {
+		var path = destpath + '/' + name + '.js';
+		console.log('Compiling the code to:', path);
+		fs.writeFileSync(path, renderedmap[name], 'UTF-8');
+	}
+	next();
+}
+
+function copyNodeBufferCode(next) {
+	var path = args.getDestPath() + '/lib/';
+	try {
+		fs.mkdirSync(path);
+	} catch (e) {
+		// well...
+	}
+	var srcpath = __dirname + '/../../src/js/';
+	var buf = fs.readFileSync(srcpath + 'buf.js', 'UTF-8');
+	fs.writeFileSync(path + 'buf.js', buf, 'UTF-8');
+	var buffer = fs.readFileSync(srcpath + 'buffer.js', 'UTF-8');
+	fs.writeFileSync(path + 'buffer.js', buffer, 'UTF-8');
+	var index = fs.readFileSync(srcpath + 'index.js', 'UTF-8');
+	fs.writeFileSync(path + 'node-buffer.js', index, 'UTF-8');
+	var type = fs.readFileSync(srcpath + 'type.js', 'UTF-8');
+	fs.writeFileSync(path + 'type.js', type, 'UTF-8');
+	next();
+}
+
 function renderDSLList(list) {
 	for (var i = 0, len = list.length; i < len; i++) {
-		var keys = Object.keys(list[i]);
-		var dsl = list[i][keys[0]];
-		renderDSL(keys[0], dsl);
+		for (var key in list[i]) {
+			var dsl = list[i][key];
+			console.log('Render DSL:', key);
+			renderDSL(key, dsl);
+		}
 	}
 }
 
@@ -39,12 +72,29 @@ function renderDSL(name, dsl) {
 	// copy from template
 	var rendered = template;
 	// render description
+	rendered = renderDesc(rendered, name, dsl);
+	// render property types
+	rendered = renderTypeMap(rendered, name, dsl);
+	// render props of .create()
+	rendered = renderProps(rendered, name, dsl); 
+	// keep rendered code in the map
+	
+	if (renderedmap[name]) {
+		throw new Error('Duplicate DSL name [' + name + ']');
+	}
+
+	renderedmap[name] = rendered;
+}
+
+function renderDesc(rendered, name, dsl) {
 	var dsc = name;
 	if (dsl.description) {
 		dsc = dsl.description;
 	}
-	rendered = rendered.replace('{{ description }}', '/**\n' + dsc + '\n*/');
-	// render property types
+	return rendered.replace('{{ description }}', '/**\n' + dsc + '\n*/');
+}
+
+function renderTypeMap(rendered, name, dsl) {
 	var params = dsl.params;
 	var types = [];
 	for (var key in params) {
@@ -81,15 +131,27 @@ function renderDSL(name, dsl) {
 			case 'bin':
 				str += INDENT + key + ': nodeBuffer.TYPE.BIN';
 				break;
+			case 'datetime':
+				str += INDENT + key + ': \'datetime\'';
+				break;
+			default:
+				str += INDENT + key + ': nodeBuffer.TYPE.BUF';
 		}
 		types.push(str);
 	}
-	rendered = rendered.replace('{{ propTypes }}', types.join(',\n'));
+	return rendered.replace('{{ propTypes }}', types.join(',\n'));
+}
 
-	console.log('-----------------------------');
-	console.log(rendered);
-	console.log('-----------------------------');
-
+function renderProps(rendered, name, dsl) {
+	var str = '{\n';
+	var params = dsl.params;
+	var list = [];
+	for (var key in params) {
+		var param = params[key];
+		var defaultVal = param.default !== undefined ? param.default : null;
+		list.push(INDENT + INDENT + key + ': ' + defaultVal);
+	}
+	return rendered.replace('{{ props }}', '{\n' +  list.join(',\n') + '\n' + INDENT + '}');
 }
 
 function done(error) {

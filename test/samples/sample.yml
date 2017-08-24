@@ -1,10 +1,10 @@
 sample1:
   dsl: struct
   params:
-    id: { type: uint32, comment: Unique ID }
-    key: { type: string }
-    value: { type: string, comment: Probably JSON }
-    enabled: { type: bool }
+    id: { type: uint32, comment: Unique ID, default: 0 }
+    key: { type: string, default: "''" }
+    value: { type: string, comment: Probably JSON, default: "{}" }
+    enabled: { type: bool, default: true }
     sample2list: { type: sample2, array: true } 
     _eight: { type: int8 }
     _sixteen: { type: int16 }

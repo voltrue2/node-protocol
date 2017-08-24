@@ -1,11 +1,12 @@
 'use strict';
 
-const type = require('./lib/js/type');
-const buf = require('./lib/js/buf');
+const type = require('./type');
+const buf = require('./buf');
 
 module.exports = {
 	getType: type.get,
 	create: buf.create,
+	parse: buf.parse,
 	TYPE: {
 		INT8: type.INT8,
 		INT16: type.INT16,
@@ -15,10 +16,7 @@ module.exports = {
 		UINT32: type.UINT32,
 		DOUBLE: type.DOUBLE,
 		STR: type.STR,
-		OBJ: type.OBJ,
 		BOOL: type.BOOL,
-		NUL: type.NUL,
-		UNDEF: type.UNDEF,
 		BIN: type.BIN,
 		UNKNOWN: type.UNKNOWN
 	},
@@ -30,11 +28,9 @@ module.exports = {
 	isUInt32: isUInt32,
 	isDouble: isDouble,
 	isString: isString,
-	isObject: isObject,
 	isBool: isBool,
-	isNull: isNull,
-	isUndefined: isUndefined,
 	isBuffer: isBuffer,
+	isBuf: isBuf
 };
 
 function isInt8(val) {
@@ -69,24 +65,16 @@ function isBool(val) {
 	return type.get(val) === type.BOOL;
 }
 
-function isNull(val) {
-	return type.get(val) === type.NUL;
-}
-
-function isObject(val) {
-	return type.get(val) === type.OBJ;
-}
-
 function isString(val) {
 	return type.get(val) === type.STR;
 }
 
-function isUndefined(val) {
-	return type.get(val) === type.UNDEF;
-}
-
 function isBuffer(val) {
 	return type.get(val) === type.BIN;
+}
+
+function isBuf(val) {
+	return type.get(val) === TYPE.BUF;
 }
 
 function isInt16(val) {
