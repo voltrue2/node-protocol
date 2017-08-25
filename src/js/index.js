@@ -18,6 +18,7 @@ module.exports = {
 		STR: type.STR,
 		BOOL: type.BOOL,
 		BIN: type.BIN,
+		BUF: type.BUF,
 		UNKNOWN: type.UNKNOWN
 	},
 	isInt8: isInt8,

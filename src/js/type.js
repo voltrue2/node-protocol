@@ -96,7 +96,7 @@ function getObjType(value) {
 		}
 		return BIN;
 	}
-	throw new Error('Value cannot a an object/array');
+	throw new Error('Value cannot be an object/array');
 	//return OBJ;
 }
 

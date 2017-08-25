@@ -1,6 +1,8 @@
 'use strict';
 {{ description }}
 const nodeBuffer = require('./lib/node-buffer');
+{{ requires }}
+const id = {{ id }};
 const types = {
 {{ propTypes }}
 };
@@ -80,12 +82,10 @@ function pack(obj) {
 				}
 				break;
 			case nodeBuffer.TYPE.BUF:
-				if (!nodeBuffer.isBuf(obj[key])) {
-					throw new Error('Property[' + key + '] must be buf binary');
-				}
+				val = requires[key].pack(val);
 				break;
 			case 'datetime':
-				if (!nodeBuffer.isDouble(obj[key])) {
+				if (!val instanceof Date) {
 					throw new Error('Property[' + key + '] must be datetime/double');
 				}
 				val = new Date(val).getTime();
@@ -115,7 +115,7 @@ function unpack(buf) {
 
 function _unpack(key, parsed) {
 	var res = {};
-	var struct = require('./' + key).create();
+	var struct = requires[key].create();
 	var types = struct._types();
 	var i = 0;
 	for (var k in types) {

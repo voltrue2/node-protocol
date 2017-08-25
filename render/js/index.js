@@ -59,20 +59,26 @@ function copyNodeBufferCode(next) {
 }
 
 function renderDSLList(list) {
+	var id = 0;
 	for (var i = 0, len = list.length; i < len; i++) {
 		for (var key in list[i]) {
 			var dsl = list[i][key];
 			console.log('Render DSL:', key);
-			renderDSL(key, dsl);
+			renderDSL(id, key, dsl);
+			id += 1;
 		}
 	}
 }
 
-function renderDSL(name, dsl) {
+function renderDSL(id, name, dsl) {
 	// copy from template
 	var rendered = template;
+	// render id
+	rendered = rendered.replace('{{ id }}', id);
 	// render description
 	rendered = renderDesc(rendered, name, dsl);
+	// render required modules
+	rendered = renderRequires(rendered, name, dsl);
 	// render property types
 	rendered = renderTypeMap(rendered, name, dsl);
 	// render props of .create()
@@ -92,6 +98,31 @@ function renderDesc(rendered, name, dsl) {
 		dsc = dsl.description;
 	}
 	return rendered.replace('{{ description }}', '/**\n' + dsc + '\n*/');
+}
+
+function renderRequires(rendered, name, dsl) {
+	var list = [];
+	var params = dsl.params;
+	for (var key in params) {
+		var type = params[key].type;
+		switch (type) {
+			case 'int8':
+			case 'uint8':
+			case 'int16':
+			case 'uint16':
+			case 'int32':
+			case 'uint32':
+			case 'double':
+			case 'bool':
+			case 'string':
+			case 'datetime':
+				continue;
+				break;
+			default:
+				list.push('\t' + key + ': require(\'./' + type + '\')');
+		}
+	}
+	return rendered.replace('{{ requires }}', 'const requires = {\n' + list.join(',\n') + '\n};');
 }
 
 function renderTypeMap(rendered, name, dsl) {
@@ -148,8 +179,24 @@ function renderProps(rendered, name, dsl) {
 	var list = [];
 	for (var key in params) {
 		var param = params[key];
+		var type = param.type;
 		var defaultVal = param.default !== undefined ? param.default : null;
-		list.push(INDENT + INDENT + key + ': ' + defaultVal);
+		switch (type) {
+			case 'int8':
+			case 'uint8':
+			case 'int16':
+			case 'uint16':
+			case 'int32':
+			case 'uint32':
+			case 'double':
+			case 'bool':
+			case 'string':
+			case 'datetime':
+				list.push(INDENT + INDENT + key + ': ' + defaultVal);
+				break;
+			default:
+				list.push(INDENT + INDENT + key + ': requires.' + key + '.create()');
+		}
 	}
 	return rendered.replace('{{ props }}', '{\n' +  list.join(',\n') + '\n' + INDENT + '}');
 }
