@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"dependencies": {
 		"async": "2.5.0",
-		"js-yaml": "3.8.4"
+		"js-yaml": "3.13.1"
 	},
 	"jshintConfig": {
 		"esversion": 6,
