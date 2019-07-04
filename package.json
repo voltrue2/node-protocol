@@ -1,38 +1,44 @@
 {
-	"name": "node-protocol",
-	"description": "Data conversion into binary for network communications and more",
-	"version": "0.0.1",
-	"dependencies": {
-		"async": "2.5.0",
-		"js-yaml": "3.13.1"
-	},
-	"jshintConfig": {
-		"esversion": 6,
-		"node": true,
-		"bitwise": false,
-		"camelcase": true,
-		"curly": true,
-		"eqeqeq": true,
-		"forin": false,
-		"immed": true,
-		"latedef": false,
-		"newcap": true,
-		"noarg": true,
-		"noempty": true,
-		"undef": true,
-		"unused": true,
-		"nonew": true,
-		"white": true,
-		"maxdepth": 5,
-		"quotmark": "single",
-		"globals": {
-			"mocha": false,
-			"describe": false,
-			"it": false,
-			"before": false,
-			"beforeEach": false,
-			"after": false,
-			"afterEach": false
-		}
-	}
+  "name": "node-protocol",
+  "description": "Data conversion into binary for network communications and more",
+  "version": "0.0.1",
+  "dependencies": {
+    "async": "2.5.0",
+    "js-yaml": "3.13.1",
+    "snyk": "^1.189.0"
+  },
+  "jshintConfig": {
+    "esversion": 6,
+    "node": true,
+    "bitwise": false,
+    "camelcase": true,
+    "curly": true,
+    "eqeqeq": true,
+    "forin": false,
+    "immed": true,
+    "latedef": false,
+    "newcap": true,
+    "noarg": true,
+    "noempty": true,
+    "undef": true,
+    "unused": true,
+    "nonew": true,
+    "white": true,
+    "maxdepth": 5,
+    "quotmark": "single",
+    "globals": {
+      "mocha": false,
+      "describe": false,
+      "it": false,
+      "before": false,
+      "beforeEach": false,
+      "after": false,
+      "afterEach": false
+    }
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
