@@ -3,7 +3,7 @@
 	"description": "Data conversion into binary for network communications and more",
 	"version": "0.0.1",
 	"dependencies": {
-		"async": "2.5.0",
+		"async": "3.2.2",
 		"js-yaml": "3.13.1"
 	},
 	"jshintConfig": {
